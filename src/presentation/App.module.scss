@@ -1,0 +1,30 @@
+.container {
+  display: flex;
+  max-height: 100vh;
+  height: 100vh;
+
+  @media (max-width: 600px) {
+    flex-direction: column;
+  }
+
+  .main {
+    display: flex;
+    flex-direction: column;
+    justify-content: stretch;
+    box-sizing: border-box;
+    flex: 1 1 100%;
+    overflow: overlay;
+
+    @media (max-width: 600px) {
+      padding-bottom: 49px;
+    }
+  }
+
+  .bottomNav {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+  }
+}

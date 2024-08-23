@@ -1,0 +1,32 @@
+.container {
+  background-color: #1e1e1e;
+  color: hsl(0, 0%, 85%);
+  outline: none;
+  padding: 0 16px;
+  padding-bottom: 144px;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  max-height: 100%;
+  height: 100%;
+
+  overflow-y: overlay;
+  width: 100%;
+
+  h1 {
+    font-size: 1.6em;
+  }
+  h2 {
+    font-size: 1.4em;
+  }
+  h3 {
+    font-size: 1.2em;
+  }
+
+  .badges {
+    display: flex;
+    gap: 8px;
+    margin: 8px 0;
+    flex-wrap: wrap;
+  }
+}
