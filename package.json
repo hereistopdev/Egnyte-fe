@@ -2,7 +2,6 @@
   "name": "filepad",
   "version": "0.1.0",
   "private": true,
-  "homepage": "/filepad",
   "dependencies": {
     "@ant-design/icons": "^5.0.1",
     "@lexical/react": "^0.10.0",
