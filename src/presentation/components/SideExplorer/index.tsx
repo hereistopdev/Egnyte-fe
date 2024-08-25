@@ -32,6 +32,7 @@ import {
 } from "../../../domain/repositories/DirectoryState";
 import { Empty } from "antd";
 import { useReduxDirectoryState } from "../../../infrastructure/state/DirectoryState";
+import axiosInstance from "../../../utils/axiosInstance";
 
 interface FolderProps {
   folder: Directory.FolderMetadata;
@@ -198,6 +199,37 @@ export function Folder({ folder }: FolderProps) {
     if (isConfirmedDelete === false) return;
 
     console.log("Export", folder);
+
+    try {
+      const response = await axiosInstance.post(
+        `http://localhost:8001/api/download`,
+        {
+          path: folder.path.slice(1),
+        },
+        { responseType: "blob" }
+      );
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+
+      const contentDisposition = response.headers["content-disposition"];
+      const filename = contentDisposition
+        ? contentDisposition.split("filename=")[1].replace(/"/g, "")
+        : "download.csv";
+
+      link.setAttribute("download", filename);
+
+      // Append to the document and trigger the download
+      document.body.appendChild(link);
+      link.click();
+
+      // Cleanup
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      console.log(response.data);
+    } catch (error) {
+      console.error("Error downloading the file:", error);
+    }
   };
 
   const createNewFile = async (
