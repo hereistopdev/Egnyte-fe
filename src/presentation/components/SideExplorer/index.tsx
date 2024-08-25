@@ -3,6 +3,7 @@ import {
   DeleteOutlined,
   FileAddOutlined,
   FolderAddOutlined,
+  ExportOutlined,
 } from "@ant-design/icons";
 
 import { ReactComponent as ChevronRightIcon } from "../../icons/chevron-right.svg";
@@ -95,13 +96,11 @@ export function SideExplorer({ workspace }: SideExplorerProps) {
 }
 
 export function FolderItems({ folder }: ExplorerItemsProps) {
-  console.log("folderitems:", folder);
   const { fetchFolderContent, folderContent, folderStatus } =
     useFolderAdapter(folder);
 
   useEffect(fetchFolderContent, []);
 
-  console.log("fetchfffff", folderContent);
   if (folderStatus === FolderStatus.ContentLoading) {
     return <div>Loading...</div>;
   }
@@ -188,6 +187,19 @@ export function Folder({ folder }: FolderProps) {
     deleteFolder();
   };
 
+  const exportFolder = async (
+    event: React.MouseEvent<HTMLSpanElement, MouseEvent>
+  ) => {
+    event.stopPropagation();
+    event.preventDefault();
+    const isConfirmedDelete = confirm(
+      `Export File lists would use huge API usage. Are you sure continue to export lists for ${folder.name}`
+    );
+    if (isConfirmedDelete === false) return;
+
+    console.log("Export", folder);
+  };
+
   const createNewFile = async (
     event: React.MouseEvent<HTMLSpanElement, MouseEvent>
   ) => {
@@ -230,6 +242,12 @@ export function Folder({ folder }: FolderProps) {
           <span>{folder.name}</span>
         </div>
         <div className={style.right}>
+          <ExportOutlined
+            className={style.iconButton}
+            title={`Export List: ${folder.name}`}
+            onClick={exportFolder}
+          />
+
           <DeleteOutlined
             className={style.iconButton}
             title={`Delete Folder: ${folder.name}`}

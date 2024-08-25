@@ -8,6 +8,7 @@ import reportWebVitals from "./reportWebVitals";
 import "./presentation/index.scss";
 import { PersistSelectedStates } from "./presentation/supports/Persistence";
 import { ConfigProvider, theme } from "antd";
+import { GlobalProvider } from "./provider/GlobalContext";
 
 const container = document.getElementById("root")!;
 const root = createRoot(container);
@@ -15,22 +16,21 @@ const root = createRoot(container);
 root.render(
   <React.StrictMode>
     <Provider store={store}>
-      <BrowserRouter>
-        <PersistSelectedStates>
-          <ConfigProvider
-            theme={{
-              algorithm: theme.compactAlgorithm,
-            }}
-          >
-            <App />
-          </ConfigProvider>
-        </PersistSelectedStates>
-      </BrowserRouter>
+      <GlobalProvider>
+        <BrowserRouter>
+          <PersistSelectedStates>
+            <ConfigProvider
+              theme={{
+                algorithm: theme.compactAlgorithm,
+              }}
+            >
+              <App />
+            </ConfigProvider>
+          </PersistSelectedStates>
+        </BrowserRouter>
+      </GlobalProvider>
     </Provider>
   </React.StrictMode>
 );
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
 reportWebVitals();

@@ -26,16 +26,13 @@ function App() {
 
   const getAccessToken = async () => {
     try {
-      const response = await axios.post(
-        "https://egnyte-be.onrender.com/api/token",
-        {
-          grant_type: "password",
-          username: "hereis.topdev@gmail.com",
-          password: "Dr@gon0314",
-          client_id: "wtp8pzhmf63n6av27448wxn7", //'p9tpj7gvdzu6ea9szw4k3kvh',
-          client_secret: "bZPSVrN3euj4ygQzhZ7k35yEsxG9JmbbAVk5cNhqNjmsDuVnud", //'Eu28w2gyBtnBajtSmbt9QAbxBzmppbgyNhN9n8eyNxFMAuy2zx'
-        }
-      );
+      const response = await axios.post("http://localhost:8001/api/token", {
+        grant_type: "password",
+        username: "hereis.topdev@gmail.com",
+        password: "Dr@gon0314",
+        client_id: "wtp8pzhmf63n6av27448wxn7", //'p9tpj7gvdzu6ea9szw4k3kvh',
+        client_secret: "bZPSVrN3euj4ygQzhZ7k35yEsxG9JmbbAVk5cNhqNjmsDuVnud", //'Eu28w2gyBtnBajtSmbt9QAbxBzmppbgyNhN9n8eyNxFMAuy2zx'
+      });
       const accessToken = response.data.access_token;
       console.log("Access Token:", accessToken);
 

@@ -1,63 +1,68 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { useParams } from 'react-router-dom'
-import { useSelector } from 'react-redux'
-import { FloatingPanel, FloatingPanelRef } from 'antd-mobile'
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useParams } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { FloatingPanel, FloatingPanelRef } from "antd-mobile";
 
-import { selectActiveFolderMetadata, selectFolderMetadata } from '../../../infrastructure/state/DirectoryState'
+import {
+  selectActiveFolderMetadata,
+  selectFolderMetadata,
+} from "../../../infrastructure/state/DirectoryState";
 
-import { Directory } from '../../../domain/entities/Directory'
-import { MonacoEditorWrapper } from '../../components/MonacoEditorWrapper'
-import { SideExplorer } from '../../components/SideExplorer'
-import { useFolderAdapter } from '../../../adapters/DirectoryAdapter'
-import { FolderStatus } from '../../../domain/repositories/DirectoryState'
-import { Tabs, TabsProps } from 'antd'
-import { useWindowSize } from 'react-use'
-import { SubNav } from '../../components/Nav/SubNav'
-import style from './index.module.scss'
+import { Directory } from "../../../domain/entities/Directory";
+import { MonacoEditorWrapper } from "../../components/MonacoEditorWrapper";
+import { SideExplorer } from "../../components/SideExplorer";
+import { useFolderAdapter } from "../../../adapters/DirectoryAdapter";
+import { FolderStatus } from "../../../domain/repositories/DirectoryState";
+import { Tabs, TabsProps } from "antd";
+import { useWindowSize } from "react-use";
+import { SubNav } from "../../components/Nav/SubNav";
+import style from "./index.module.scss";
 // import { LexicalEditorWrapper } from '../../components/LexicalEditorWrapper'
-import { AboutAppWrapper } from '../../components/AboutAppWrapper'
-import {ExplorerPage} from '../explorer'
+import { AboutAppWrapper } from "../../components/AboutAppWrapper";
+import { ExplorerPage } from "../explorer";
 
-
-type TargetKey = React.MouseEvent | React.KeyboardEvent | string
+type TargetKey = React.MouseEvent | React.KeyboardEvent | string;
 
 export function EditorPage() {
-
-  
   // const { folderId, fileId } = useParams()
-  let workspace: Pick<Directory.FolderMetadata, 'path' | 'id'> = Directory.RootNode
+  let workspace: Pick<Directory.FolderMetadata, "path" | "id"> =
+    Directory.RootNode;
 
-  const activeFolder  = useSelector(selectActiveFolderMetadata());
+  const activeFolder = useSelector(selectActiveFolderMetadata());
 
-  const path = activeFolder.path
-  const folderId = activeFolder.id
-
-  console.log("path from reducer:", path)
+  const path = activeFolder.path;
+  const folderId = activeFolder.id;
 
   if (path && folderId) {
-    workspace = { path: path, id: folderId, }
+    workspace = { path: path, id: folderId };
   }
 
-  const [files, setFiles] = useState<NonNullable<TabsProps['items']>>([
+  const [files, setFiles] = useState<NonNullable<TabsProps["items"]>>([
     {
-      key: '-1',
-      label: 'About',
-      children: <AboutAppWrapper />
+      key: "-1",
+      label: "About",
+      children: <AboutAppWrapper />,
     },
     // {
     //   key: '0',
     //   label: 'NotePad',
     //   children: <LexicalEditorWrapper />,
     // }
-  ])
-  const [activeFileKey, setActiveFileKey] = useState<string>()
+  ]);
+  const [activeFileKey, setActiveFileKey] = useState<string>();
 
-  const { fetchFolderMetadata, fetchFolderContent, folderStatus, folderMetadata, folderContent, createFile } = useFolderAdapter(workspace)
-  useEffect(fetchFolderMetadata, [])
-  useEffect(()=>{
-    fetchFolderContent
-    console.log("path------------------------", path)
-  }, [activeFolder.path])
+  const {
+    fetchFolderMetadata,
+    fetchFolderContent,
+    folderStatus,
+    folderMetadata,
+    folderContent,
+    createFile,
+  } = useFolderAdapter(workspace);
+  useEffect(fetchFolderMetadata, []);
+  useEffect(() => {
+    fetchFolderContent;
+  }, [activeFolder.path]);
 
   // const openFile = useMemo(() => (file: Directory.FileMetadata, dynamicPosition = true) => {
   //   const targetIndex = files.findIndex((pane) => pane.key === file.id)
@@ -80,7 +85,7 @@ export function EditorPage() {
   //   }
 
   //   setActiveFileKey(file.id)
-  
+
   //   return
 
   //   // const uniqueFilesSet = new Set<Directory.FileMetadata>((a, b) => {
@@ -133,9 +138,9 @@ export function EditorPage() {
   //   })
   // }, [folderContent.length])
 
-  const anchors = [100, window.innerHeight * 0.6]
-  const ref = useRef<FloatingPanelRef>(null)
-  const { width: windowWidth } = useWindowSize()
+  const anchors = [100, window.innerHeight * 0.6];
+  const ref = useRef<FloatingPanelRef>(null);
+  const { width: windowWidth } = useWindowSize();
 
   // const onChange = (key: string) => {
   //   setActiveFileKey(key)
@@ -154,29 +159,29 @@ export function EditorPage() {
   // }
 
   if (folderStatus == FolderStatus.Loading) {
-    return <p>Loading...</p>
+    return <p>Loading...</p>;
   }
 
   if (folderMetadata === undefined) {
-    return <p>Could not Find Folder</p>
+    return <p>Could not Find Folder</p>;
   }
 
   return (
     <div className={style.container}>
-      {
-        windowWidth >= 800
-          ? <SubNav title='Editor' className={style.sideNav}>
+      {windowWidth >= 800 ? (
+        <SubNav title="Editor" className={style.sideNav}>
+          <SideExplorer workspace={Directory.RootNode} />
+        </SubNav>
+      ) : (
+        <FloatingPanel anchors={anchors} ref={ref}>
+          <div style={{ padding: "0 16px 16px 16px" }}>
             <SideExplorer workspace={Directory.RootNode} />
-          </SubNav>
-          : <FloatingPanel anchors={anchors} ref={ref}>
-            <div style={{ padding: '0 16px 16px 16px' }}>
-              <SideExplorer workspace={Directory.RootNode} />
-            </div>
-          </FloatingPanel>
-      }
+          </div>
+        </FloatingPanel>
+      )}
       {
-        <ExplorerPage workspace={activeFolder}/>
-      /* {openedFile && <EditorArea className={style.editorArea} files={files} open={openedFile} openFile={openFile} closeFile={closeFile} />}
+        <ExplorerPage workspace={activeFolder} />
+        /* {openedFile && <EditorArea className={style.editorArea} files={files} open={openedFile} openFile={openFile} closeFile={closeFile} />}
       <Tabs
         // hideAdd
         className={style.editorArea}
@@ -186,7 +191,8 @@ export function EditorPage() {
         onEdit={onEdit}
         items={files}
         tabBarGutter={0}
-      /> */}
+      /> */
+      }
     </div>
-  )
+  );
 }

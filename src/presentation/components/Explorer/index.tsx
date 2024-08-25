@@ -101,7 +101,6 @@ const deviceContextOptions: ContextMenuOptions = [
 ];
 
 export function Explorer({ workspace }: ExplorerProps) {
-  console.log(workspace);
   const { createFolder, fetchFolderContent, createFile } =
     useFolderAdapter(workspace);
 
@@ -276,7 +275,6 @@ export function FolderItems({ folder, showContextMenu }: ExplorerItemsProps) {
   ) {
     return <div>Loading...</div>;
   }
-  console.log("sdfsdfafolderItem", folderContent);
   return (
     <div className={styles.items} ref={itemsRef}>
       {folderContent.length === 0 && (
@@ -329,7 +327,7 @@ export function File({ folder, file, showContextMenu }: FileProps) {
 
   const downloadFileFromServer = async (path: string) => {
     axiosInstance
-      .get(`https://egnyte-be.onrender.com/api/filedown?filePath=${path}`, {
+      .get(`http://localhost:8001/api/filedown?filePath=${path}`, {
         responseType: "blob",
       })
       .then((response) => {
@@ -348,7 +346,6 @@ export function File({ folder, file, showContextMenu }: FileProps) {
         }
 
         // Create a blob URL and trigger a download
-        console.log(response.headers);
 
         const url = window.URL.createObjectURL(
           new Blob([response.data], { type: response.headers["content-type"] })
@@ -368,55 +365,9 @@ export function File({ folder, file, showContextMenu }: FileProps) {
       .catch((error) => {
         console.error("Error while downloading the file:", error);
       });
-
-    // try {
-    //   const response = await axiosInstance.get(
-    //     `https://egnyte-be.onrender.com/api/filedown?path=${encodeURIComponent(path)}`
-    //   );
-    //   console.log(await response.data);
-
-    //   if (response && response.status == 200 && response.data) {
-    //     const blob = await response.data; // Convert the response to a Blob object
-    //     console.log("@!#@!#@!", blob);
-
-    //     const url = window.URL.createObjectURL(blob);
-
-    //     // Create an anchor element and programmatically click it to trigger the download
-    //     const a = document.createElement("a");
-    //     a.href = url;
-
-    //     // Extract the filename from the Content-Disposition header or fallback to the path's last segment
-    //     const contentDisposition = response.headers["Content-Disposition"];
-    //     const fileName = contentDisposition
-    //       ? contentDisposition.split("filename=")[1].replace(/['"]/g, "")
-    //       : path.split("/").pop() || "download";
-
-    //     a.download = fileName; // Set the download attribute with the filename
-    //     document.body.appendChild(a);
-    //     a.click(); // Programmatically click the anchor element to start the download
-    //     document.body.removeChild(a);
-
-    //     window.URL.revokeObjectURL(url);
-    //   } else {
-    //     throw new Error(`Failed to download file: ${response.statusText}`);
-    //   }
-
-    //   // const blob = await response.blob();
-    //   // const url = window.URL.createObjectURL(blob);
-    //   // const a = document.createElement("a");
-    //   // a.href = url;
-    //   // a.download = path.split("/").pop() || "download"; // Default to the last part of the path as filename
-    //   // document.body.appendChild(a);
-    //   // a.click();
-    //   // document.body.removeChild(a);
-    //   // window.URL.revokeObjectURL(url);
-    // } catch (error) {
-    //   console.error("Error downloading file:", (error as Error).message);
-    // }
   };
 
   const handleFileClick = async (file: any) => {
-    console.log(file);
     await downloadFileFromServer(file.path.slice(1));
   };
 

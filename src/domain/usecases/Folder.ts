@@ -44,16 +44,11 @@ export const fetchFolderContent = async (
 ): Promise<Directory.FolderContent> => {
   state.setFolderStatus(folder, FolderStatus.ContentLoading);
 
-  console.log("folder_______________", folder);
-  // const nodes: Directory.FolderContent = await database.fetchFolderContent(folder)
-  const res = await axiosInstance.get(
-    `https://egnyte-be.onrender.com/api/files?path=${folder.path.slice(1)}`
-  );
-  console.log(res.data);
+  const res = await axiosInstance.post(`http://localhost:8001/api/files`, {
+    path: folder.path.slice(1),
+  });
   if (res && res.status == 200 && res.data) {
-    // console.log("wwwfetchdata",res.data);
     const Data = res.data;
-    console.log("Data.folders", Data);
     const folder_nodes: Directory.FolderContent =
       Data?.folders?.map((item: any) => ({
         type: Directory.NodeType.folder,
@@ -64,7 +59,6 @@ export const fetchFolderContent = async (
         createdAt: 0,
         path: item.path,
       })) || [];
-    console.log(folder_nodes);
     const file_nodes: Directory.FolderContent =
       Data?.files?.map((item: any) => ({
         type: Directory.NodeType.file,
@@ -75,10 +69,7 @@ export const fetchFolderContent = async (
         createdAt: 0,
         path: item.path,
       })) || [];
-    console.log(file_nodes);
     const nodes: Directory.FolderContent = [...folder_nodes, ...file_nodes];
-
-    console.log("fetchFolderContent:", nodes);
 
     nodes.forEach((node) => {
       if (node.type === Directory.NodeType.file) state.setFileMetadata(node);
