@@ -26,7 +26,7 @@ const TokenRequestForm: React.FC = () => {
         client_secret: clientSecret,
       };
       const response = await axios.post(
-        "http://localhost:8001/api/token",
+        "https://egnyte-be.onrender.com/api/token",
         data
       );
       const accessToken = response.data.access_token;
@@ -124,6 +124,30 @@ const TokenRequestForm: React.FC = () => {
           >
             key 2
           </Button>
+          {/* <Button
+            onClick={() => {
+              setkeys(2);
+              setClientId("g8nq4wjnq3j866w5bmb2q684");
+              setClientSecret(
+                "NV5StXQ3594FsFAjbSnkGnrmDtTccFY3qd2c3tww8dc6S24C"
+              );
+            }}
+            type={keys == 2 ? "primary" : "default"}
+          >
+            key 3
+          </Button>
+          <Button
+            onClick={() => {
+              setkeys(3);
+              setClientId("y99zyh56ga8r5j224a6edkg5");
+              setClientSecret(
+                "xcBrgJguauav8kmWgxd2xDB4vVyV6mPnHmsuQjhck8Ne9BAQ"
+              );
+            }}
+            type={keys == 3 ? "primary" : "default"}
+          >
+            key 4
+          </Button> */}
         </ButtonGroup>
         <br />
         <br />

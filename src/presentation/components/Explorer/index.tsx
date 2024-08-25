@@ -327,7 +327,7 @@ export function File({ folder, file, showContextMenu }: FileProps) {
 
   const downloadFileFromServer = async (path: string) => {
     axiosInstance
-      .get(`http://localhost:8001/api/filedown?filePath=${path}`, {
+      .get(`https://egnyte-be.onrender.com/api/filedown?filePath=${path}`, {
         responseType: "blob",
       })
       .then((response) => {

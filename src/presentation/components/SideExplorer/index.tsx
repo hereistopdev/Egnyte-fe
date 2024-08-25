@@ -202,7 +202,7 @@ export function Folder({ folder }: FolderProps) {
 
     try {
       const response = await axiosInstance.post(
-        `http://localhost:8001/api/download`,
+        `https://egnyte-be.onrender.com/api/download`,
         {
           path: folder.path.slice(1),
         },
