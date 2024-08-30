@@ -34,6 +34,9 @@ import { toggleExpansion } from "../../../infrastructure/state/sideExplorerSlice
 import { selectFolderContent } from "../../../infrastructure/state/DirectoryState";
 import axiosInstance from "../../../utils/axiosInstance";
 import axios from "axios";
+import { toast, ToastContainer } from "react-toastify";
+import { DownCircleOutline } from "antd-mobile-icons";
+import { DownCircleOutlined, DownloadOutlined } from "@ant-design/icons";
 
 export interface ExplorerProps {
   workspace: Directory.FolderMetadata;
@@ -75,7 +78,7 @@ const folderContextOptions: ContextMenuOptions = [
   { icon: RenameIcon, text: "Rename Folder" },
   { icon: TrashIcon, text: "Delete Folder" },
   null,
-  { icon: LinkExternalIcon, text: "Open Folder in Editor" },
+  { icon: DownCircleOutline, text: "Download Folder" },
 ];
 
 const deviceExplorerContextOptions: ContextMenuOptions = [
@@ -206,6 +209,7 @@ export function Explorer({ workspace }: ExplorerProps) {
         }
       >
         <BreadCrumbs folder={workspace} showContextMenu={showContextMenu} />
+        <ToastContainer />
         <hr />
         <div ref={itemsRef}>
           <FolderItems folder={workspace} showContextMenu={showContextMenu} />
@@ -361,6 +365,8 @@ export function File({ folder, file, showContextMenu }: FileProps) {
         // Cleanup
         document.body.removeChild(link);
         window.URL.revokeObjectURL(url);
+
+        toast.success(`File Downloaded. ${fileName}`);
       })
       .catch((error) => {
         console.error("Error while downloading the file:", error);
@@ -408,9 +414,37 @@ export function Folder({ folder, showContextMenu }: FolderProps) {
     directoryState.setActiveFolderMetadata(folder);
   };
 
+  const downloadFolderFromServer = async () => {
+    const folderPath = folder.path;
+    try {
+      const response = await axiosInstance.get(
+        "https://egnyte-be.onrender.com/api/folder-download",
+        {
+          params: { folderPath },
+        }
+      );
+
+      // Create a URL for the downloaded file
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `${folderPath.split("/").pop()}.zip`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error("Error downloading folder:", error);
+    }
+  };
+
   const folderContextOptions: ContextMenuOptions = [
     { icon: RenameIcon, text: "Rename Folder", onClick: renameThisFolder },
     { icon: TrashIcon, text: "Delete Folder", onClick: deleteFolder },
+    {
+      icon: DownloadOutlined,
+      text: "Download Folder",
+      onClick: downloadFolderFromServer,
+    },
     null,
     {
       icon: LinkExternalIcon,

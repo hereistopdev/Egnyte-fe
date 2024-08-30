@@ -26,7 +26,6 @@ function App() {
 
   const getAccessToken = async () => {
     const token = localStorage.getItem("access_token");
-    console.log(token);
     if (!token || token.length == 0) {
       try {
         const response = await axios.post(

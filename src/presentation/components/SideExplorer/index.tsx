@@ -19,7 +19,7 @@ import {
 } from "../../../infrastructure/state/sideExplorerSlice";
 import { Directory } from "../../../domain/entities/Directory";
 // import { fileStorageInteractor } from '../../../adapters/FileStorageAdapter'
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 // import { NavLinkPersist } from '../../supports/Persistence'
 // import { useParams } from 'react-router-dom'
 import {
@@ -33,6 +33,9 @@ import {
 import { Empty } from "antd";
 import { useReduxDirectoryState } from "../../../infrastructure/state/DirectoryState";
 import axiosInstance from "../../../utils/axiosInstance";
+
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 interface FolderProps {
   folder: Directory.FolderMetadata;
@@ -170,6 +173,43 @@ export function File({ file }: FileProps) {
 
 export function Folder({ folder }: FolderProps) {
   // const [isExpanded, toggleExpansion] = useState(false)
+
+  const [progress, setProgress] = useState(0);
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  useEffect(() => {
+    const ws = new WebSocket("ws://localhost:8001");
+
+    ws.onopen = () => {
+      console.log("Connected to WebSocket server");
+    };
+
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      setProgress(data.progress);
+      toast.update("progress-toast", {
+        render: `Fetching lists... ${Math.round(
+          data.progress
+        )} items processed`,
+        type: "info",
+        autoClose: false,
+        isLoading: true,
+      });
+    };
+
+    ws.onclose = () => {
+      console.log("WebSocket connection closed");
+    };
+
+    ws.onerror = (error) => {
+      console.error("WebSocket error:", error);
+    };
+
+    return () => {
+      ws.close();
+    };
+  }, []);
+
   const isExpanded = useAppSelector(selectFolderExpansionState(folder));
   const dispatch = useAppDispatch();
   const directoryState: DirectoryState = useReduxDirectoryState(dispatch);
@@ -199,7 +239,8 @@ export function Folder({ folder }: FolderProps) {
     if (isConfirmedDelete === false) return;
 
     console.log("Export", folder);
-
+    setIsDownloading(true);
+    toast.loading(`Fetching lists...`, { toastId: "progress-toast" });
     try {
       const response = await axiosInstance.post(
         `https://egnyte-be.onrender.com/api/download`,
@@ -226,9 +267,22 @@ export function Folder({ folder }: FolderProps) {
       // Cleanup
       link.remove();
       window.URL.revokeObjectURL(url);
-      console.log(response.data);
+      toast.update("progress-toast", {
+        render: `Download complete!`,
+        type: "success",
+        autoClose: 5000,
+        isLoading: false,
+      });
     } catch (error) {
       console.error("Error downloading the file:", error);
+      toast.update("progress-toast", {
+        render: "Download failed!",
+        type: "error",
+        autoClose: 5000,
+        isLoading: false,
+      });
+    } finally {
+      setIsDownloading(false);
     }
   };
 
@@ -272,6 +326,12 @@ export function Folder({ folder }: FolderProps) {
             <ChevronRightIcon />
           </span>
           <span>{folder.name}</span>
+
+          <p>
+            {isDownloading && (
+              <div>Progress: {Math.round(progress)} items processed</div>
+            )}
+          </p>
         </div>
         <div className={style.right}>
           <ExportOutlined
