@@ -178,7 +178,7 @@ export function Folder({ folder }: FolderProps) {
   const [isDownloading, setIsDownloading] = useState(false);
 
   useEffect(() => {
-    const ws = new WebSocket("wss://egnyte-be.onrender.com:8001");
+    const ws = new WebSocket("ws://egnyte-be.onrender.com");
 
     ws.onopen = () => {
       console.log("Connected to WebSocket server");
