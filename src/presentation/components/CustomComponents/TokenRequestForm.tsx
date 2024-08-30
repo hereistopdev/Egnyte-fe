@@ -26,7 +26,7 @@ const TokenRequestForm: React.FC = () => {
         client_secret: clientSecret,
       };
       const response = await axios.post(
-        "https://egnyte-be.onrender.com/api/token",
+        "http://localhost:8001/api/token",
         data
       );
       const accessToken = response.data.access_token;

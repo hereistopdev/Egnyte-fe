@@ -44,12 +44,9 @@ export const fetchFolderContent = async (
 ): Promise<Directory.FolderContent> => {
   state.setFolderStatus(folder, FolderStatus.ContentLoading);
 
-  const res = await axiosInstance.post(
-    `https://egnyte-be.onrender.com/api/files`,
-    {
-      path: folder.path.slice(1),
-    }
-  );
+  const res = await axiosInstance.post(`http://localhost:8001/api/files`, {
+    path: folder.path.slice(1),
+  });
   if (res && res.status == 200 && res.data) {
     const Data = res.data;
     const folder_nodes: Directory.FolderContent =

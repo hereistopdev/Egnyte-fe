@@ -315,7 +315,7 @@ export function File({ folder, file, showContextMenu }: FileProps) {
 
   useEffect(() => {
     // Initialize WebSocket connection
-    const socket = new WebSocket("wss://egnyte-be.onrender.com");
+    const socket = new WebSocket("ws://localhost:8001");
     setWs(socket);
 
     // Listen for messages from the server
@@ -373,7 +373,7 @@ export function File({ folder, file, showContextMenu }: FileProps) {
 
     try {
       const response = await axiosInstance.post(
-        `https://egnyte-be.onrender.com/api/filedown`,
+        `http://localhost:8001/api/filedown`,
         {
           filePath: path,
         },
@@ -478,7 +478,7 @@ export function Folder({ folder, showContextMenu }: FolderProps) {
 
   const downloadFolderFromServer = async () => {
     const folderPath = folder.path;
-    const ws = new WebSocket("wss://egnyte-be.onrender.com");
+    const ws = new WebSocket("ws://localhost:8001");
 
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
@@ -504,7 +504,7 @@ export function Folder({ folder, showContextMenu }: FolderProps) {
 
       // Initiate the download request
       const response = await axiosInstance.post(
-        "https://egnyte-be.onrender.com/api/folder-download",
+        "http://localhost:8001/api/folder-download",
         { folderPath: folderPath },
         { responseType: "blob" } // Ensure that the response is treated as a binary blob
       );

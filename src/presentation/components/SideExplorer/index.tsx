@@ -178,7 +178,7 @@ export function Folder({ folder }: FolderProps) {
   const [isDownloading, setIsDownloading] = useState(false);
 
   useEffect(() => {
-    const ws = new WebSocket("wss://egnyte-be.onrender.com");
+    const ws = new WebSocket("ws://localhost:8001");
 
     ws.onopen = () => {
       console.log("Connected to WebSocket server");
@@ -243,7 +243,7 @@ export function Folder({ folder }: FolderProps) {
     toast.loading(`Fetching lists...`, { toastId: "progress-toast" });
     try {
       const response = await axiosInstance.post(
-        `https://egnyte-be.onrender.com/api/download`,
+        `http://localhost:8001/api/download`,
         {
           path: folder.path.slice(1),
         },
