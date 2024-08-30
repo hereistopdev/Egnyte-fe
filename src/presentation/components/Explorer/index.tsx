@@ -315,7 +315,7 @@ export function File({ folder, file, showContextMenu }: FileProps) {
 
   useEffect(() => {
     // Initialize WebSocket connection
-    const socket = new WebSocket("ws://egnyte-be.onrender.com");
+    const socket = new WebSocket("wss://egnyte-be.onrender.com");
     setWs(socket);
 
     // Listen for messages from the server
@@ -478,7 +478,7 @@ export function Folder({ folder, showContextMenu }: FolderProps) {
 
   const downloadFolderFromServer = async () => {
     const folderPath = folder.path;
-    const ws = new WebSocket("ws://egnyte-be.onrender.com");
+    const ws = new WebSocket("wss://egnyte-be.onrender.com");
 
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
