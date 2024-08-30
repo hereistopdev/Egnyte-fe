@@ -309,6 +309,39 @@ export function FolderItems({ folder, showContextMenu }: ExplorerItemsProps) {
 }
 
 export function File({ folder, file, showContextMenu }: FileProps) {
+  const [progress, setProgress] = useState(0);
+
+  const [ws, setWs] = useState<any>(null);
+
+  useEffect(() => {
+    // Initialize WebSocket connection
+    const socket = new WebSocket("ws://localhost:8001");
+    setWs(socket);
+
+    // Listen for messages from the server
+    socket.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      setProgress(data.progress); // Update progress
+
+      // Update toast with progress
+      toast.update("download-progress", {
+        render: `Download Progress: ${data.progress}%`,
+        autoClose: false,
+      });
+
+      // If progress reaches 100%, dismiss the toast
+      // if (data.progress >= 100) {
+      //   toast.dismiss("download-progress");
+      //   toast.success("Download Complete!");
+      // }
+    };
+
+    // Clean up on component unmount
+    return () => {
+      socket.close();
+    };
+  }, []);
+
   const { deleteFile, renameFile, downloadFile } = useFileAdapter(file);
 
   const renameThisFile = async (
@@ -330,47 +363,76 @@ export function File({ folder, file, showContextMenu }: FileProps) {
   ];
 
   const downloadFileFromServer = async (path: string) => {
-    axiosInstance
-      .get(`https://egnyte-be.onrender.com/api/filedown?filePath=${path}`, {
-        responseType: "blob",
-      })
-      .then((response) => {
-        // Get the filename from the Content-Disposition header or set a default name
-        const contentDisposition = response.headers["content-disposition"];
-        let fileName = path.split("/").pop() || "downloaded file";
+    console.log(path);
 
-        if (
-          contentDisposition &&
-          contentDisposition.indexOf("attachment") !== -1
-        ) {
-          const matches = contentDisposition.match(/filename="?(.+)"?/);
-          if (matches && matches[1]) {
-            fileName = matches[1];
-          }
+    // Initialize the progress toast
+    const toastId = toast.info(`Download Progress: 0%`, {
+      autoClose: false,
+      toastId: "download-progress",
+    });
+
+    try {
+      const response = await axiosInstance.post(
+        `https://egnyte-be.onrender.com/api/filedown`,
+        {
+          filePath: path,
+        },
+        {
+          responseType: "blob",
+          onDownloadProgress: (progressEvent) => {
+            const totalLength = progressEvent.total;
+            if (totalLength !== undefined) {
+              const progressPercentage = Math.round(
+                (progressEvent.loaded * 100) / totalLength
+              );
+
+              // Update the existing toast with the new progress
+              toast.update(toastId, {
+                render: `Download Progress: ${progressPercentage}%`,
+              });
+            }
+          },
         }
+      );
 
-        // Create a blob URL and trigger a download
+      // Get the filename from the Content-Disposition header or set a default name
+      const contentDisposition = response.headers["content-disposition"];
+      let fileName = path.split("/").pop() || "downloaded_file";
 
-        const url = window.URL.createObjectURL(
-          new Blob([response.data], { type: response.headers["content-type"] })
-        );
-        const link = document.createElement("a");
-        link.href = url;
-        link.setAttribute("download", fileName);
+      if (
+        contentDisposition &&
+        contentDisposition.indexOf("attachment") !== -1
+      ) {
+        const matches = contentDisposition.match(/filename="?(.+)"?/);
+        if (matches && matches[1]) {
+          fileName = matches[1];
+        }
+      }
 
-        // Append to the document body and trigger the download
-        document.body.appendChild(link);
-        link.click();
+      // Create a blob URL and trigger a download
+      const url = window.URL.createObjectURL(
+        new Blob([response.data], { type: response.headers["content-type"] })
+      );
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", fileName);
 
-        // Cleanup
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(url);
+      // Append to the document body and trigger the download
+      document.body.appendChild(link);
+      link.click();
 
-        toast.success(`File Downloaded. ${fileName}`);
-      })
-      .catch((error) => {
-        console.error("Error while downloading the file:", error);
-      });
+      // Cleanup
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      // Complete the download and show a success toast
+      toast.dismiss(toastId);
+      toast.success(`File Downloaded: ${fileName}`);
+    } catch (error) {
+      console.error("Error while downloading the file:", error);
+      toast.dismiss(toastId); // Dismiss the progress toast if an error occurs
+      toast.error("Failed to download file. Please try again.");
+    }
   };
 
   const handleFileClick = async (file: any) => {
@@ -416,12 +478,35 @@ export function Folder({ folder, showContextMenu }: FolderProps) {
 
   const downloadFolderFromServer = async () => {
     const folderPath = folder.path;
+    const ws = new WebSocket("ws://localhost:8001");
+
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      console.log(data);
+
+      toast.update("download-progress", {
+        render: `Download Progress: ${data.progress}%`,
+        autoClose: false,
+      });
+
+      if (data.progress >= 100) {
+        toast.dismiss("download-progress");
+        toast.success("Download Complete!");
+      }
+    };
+
     try {
-      const response = await axiosInstance.get(
+      // Initialize the progress toast
+      const toastId = toast.info(`Preparing download...`, {
+        autoClose: false,
+        toastId: "download-progress",
+      });
+
+      // Initiate the download request
+      const response = await axiosInstance.post(
         "https://egnyte-be.onrender.com/api/folder-download",
-        {
-          params: { folderPath },
-        }
+        { folderPath: folderPath },
+        { responseType: "blob" } // Ensure that the response is treated as a binary blob
       );
 
       // Create a URL for the downloaded file
@@ -432,8 +517,13 @@ export function Folder({ folder, showContextMenu }: FolderProps) {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+
+      // Cleanup the URL object
+      window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error("Error downloading folder:", error);
+      toast.dismiss("download-progress");
+      toast.error("Failed to download file. Please try again.");
     }
   };
 
