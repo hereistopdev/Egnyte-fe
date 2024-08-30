@@ -315,7 +315,7 @@ export function File({ folder, file, showContextMenu }: FileProps) {
 
   useEffect(() => {
     // Initialize WebSocket connection
-    const socket = new WebSocket("ws://localhost:8001");
+    const socket = new WebSocket("wss://egnyte-be.onrender.com:8001");
     setWs(socket);
 
     // Listen for messages from the server
@@ -478,21 +478,21 @@ export function Folder({ folder, showContextMenu }: FolderProps) {
 
   const downloadFolderFromServer = async () => {
     const folderPath = folder.path;
-    const ws = new WebSocket("ws://localhost:8001");
+    const ws = new WebSocket("wss://egnyte-be.onrender.com:8001");
 
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
       console.log(data);
 
       toast.update("download-progress", {
-        render: `Download Progress: ${data.progress}%`,
+        render: `Download Progress: ${data.progress} files archived`,
         autoClose: false,
       });
 
-      if (data.progress >= 100) {
-        toast.dismiss("download-progress");
-        toast.success("Download Complete!");
-      }
+      // if (data.progress >= 100) {
+      //   toast.dismiss("download-progress");
+      //   toast.success("Download Complete!");
+      // }
     };
 
     try {
@@ -520,6 +520,8 @@ export function Folder({ folder, showContextMenu }: FolderProps) {
 
       // Cleanup the URL object
       window.URL.revokeObjectURL(url);
+      toast.dismiss("download-progress");
+      toast.success("Download Complete!");
     } catch (error) {
       console.error("Error downloading folder:", error);
       toast.dismiss("download-progress");

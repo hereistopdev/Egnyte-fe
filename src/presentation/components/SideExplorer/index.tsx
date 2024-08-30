@@ -178,7 +178,7 @@ export function Folder({ folder }: FolderProps) {
   const [isDownloading, setIsDownloading] = useState(false);
 
   useEffect(() => {
-    const ws = new WebSocket("ws://localhost:8001");
+    const ws = new WebSocket("wss://egnyte-be.onrender.com:8001");
 
     ws.onopen = () => {
       console.log("Connected to WebSocket server");
@@ -326,12 +326,6 @@ export function Folder({ folder }: FolderProps) {
             <ChevronRightIcon />
           </span>
           <span>{folder.name}</span>
-
-          <p>
-            {isDownloading && (
-              <div>Progress: {Math.round(progress)} items processed</div>
-            )}
-          </p>
         </div>
         <div className={style.right}>
           <ExportOutlined
